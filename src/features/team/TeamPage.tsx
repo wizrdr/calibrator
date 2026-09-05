@@ -12,6 +12,7 @@ import {
 } from '@/data/queries'
 import { parseJiraCsv } from '@/domain/jiraCsv'
 import { parseIssueLines } from './parseIssueLines'
+import { MappingCard } from './MappingCard'
 import { Button, Card, ErrorText, Field, Input, Textarea } from '@/ui'
 
 export function TeamPage() {
@@ -77,9 +78,17 @@ export function TeamPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-baseline justify-between">
         <h1 className="text-xl font-semibold">{team.name}</h1>
-        <Link to="/" className="text-sm text-muted hover:text-text">
-          ← команды
-        </Link>
+        <nav className="flex gap-4 text-sm">
+          <Link to={`/team/${teamId}/import`} className="text-accent hover:underline">
+            Импорт факта
+          </Link>
+          <Link to={`/team/${teamId}/report`} className="text-accent hover:underline">
+            Отчёт
+          </Link>
+          <Link to="/" className="text-muted hover:text-text">
+            ← команды
+          </Link>
+        </nav>
       </div>
       <ErrorText error={error} />
 
@@ -129,6 +138,8 @@ export function TeamPage() {
           )}
         </Card>
       </div>
+
+      <MappingCard teamId={teamId} members={members} />
 
       <Card>
         <h2 className="mb-3 text-sm font-semibold">Новая сессия</h2>

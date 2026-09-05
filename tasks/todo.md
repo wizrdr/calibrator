@@ -29,6 +29,10 @@
 - [x] Playwright `e2e/room.spec.ts`, два browser context: карта у фасилитатора появляется только после reveal, у второго участника тоже; итог переключает задачу у всех. 1 passed, 9.7s
 - [x] Dev-порт 5174 (5173 занят Dayline)
 ## Сессия 4 — импорт
+- [x] `domain/importFacts.matchImport` (матч по ключу без регистра, последняя строка при дублях, coverage) + `parseJiraDate` с тестами
+- [x] `ImportPage`: файл → preview (совпало / с фактом / coverage / лишние / недостающие) → applyFacts
+- [x] `MappingCard`: имена участников из всех сессий → member ростера (bulk по display_name)
+- [x] Playwright `e2e/import.spec.ts`: CSV с одной лишней и одной недостающей задачей → coverage 33%, применение → /report. 1 passed
 ## Сессия 5 — отчёт
 ## Сессия 6 — e2e + деплой
 

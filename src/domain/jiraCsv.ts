@@ -107,3 +107,22 @@ export function toJiraCsv(rows: readonly JiraRow[]): string {
   )
   return [header.join(','), ...lines].join('\n') + '\n'
 }
+
+const MONTHS: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+}
+
+// Jira exports "05/Sep/26 10:12 AM" with no zone; we read it as UTC and keep only the date semantics.
+export function parseJiraDate(text: string | null): string | null {
+  if (!text) return null
+  const m = /^(\d{1,2})\/([A-Za-z]{3})\/(\d{2,4})\s+(\d{1,2}):(\d{2})\s*(AM|PM)?$/i.exec(text.trim())
+  if (!m) return null
+  const [, d, mon, y, hh, mm, ap] = m
+  const month = MONTHS[mon.toLowerCase()]
+  if (month === undefined) return null
+  let hour = Number(hh) % 12
+  if (ap?.toUpperCase() === 'PM') hour += 12
+  if (!ap) hour = Number(hh)
+  const year = y.length === 2 ? 2000 + Number(y) : Number(y)
+  return new Date(Date.UTC(year, month, Number(d), hour, Number(mm))).toISOString()
+}

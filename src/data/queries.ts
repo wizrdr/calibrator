@@ -106,3 +106,49 @@ export async function castVote(v: CastVote): Promise<void> {
       .select(),
   )
 }
+
+export async function listTeamIssues(teamId: string): Promise<Issue[]> {
+  return unwrap(await supabase.from('issues').select().eq('team_id', teamId).order('order_idx'))
+}
+
+export async function listTeamSessions(teamId: string): Promise<Session[]> {
+  return unwrap(await supabase.from('sessions').select().eq('team_id', teamId))
+}
+
+export async function listTeamParticipants(teamId: string): Promise<Participant[]> {
+  const sessions = await listTeamSessions(teamId)
+  if (sessions.length === 0) return []
+  return unwrap(await supabase.from('participants').select().in('session_id', sessions.map((s) => s.id)))
+}
+
+export async function listTeamVotes(teamId: string): Promise<Vote[]> {
+  const sessions = await listTeamSessions(teamId)
+  if (sessions.length === 0) return []
+  return unwrap(await supabase.from('votes').select().in('session_id', sessions.map((s) => s.id)))
+}
+
+export type FactUpdate = {
+  issueId: string
+  jira_sp: number | null
+  time_spent_sec: number | null
+  sprints: string[]
+  status: string | null
+  resolved_at: string | null
+}
+
+export async function applyFacts(updates: FactUpdate[]): Promise<void> {
+  const now = new Date().toISOString()
+  await Promise.all(
+    updates.map(({ issueId, ...fact }) =>
+      supabase.from('issues').update({ ...fact, imported_at: now }).eq('id', issueId).select().then(unwrap),
+    ),
+  )
+}
+
+export async function assignMember(participantIds: string[], memberId: string | null): Promise<void> {
+  unwrap(await supabase.from('participants').update({ member_id: memberId }).in('id', participantIds).select())
+}
+
+export async function setExcludeReason(issueId: string, reason: string | null): Promise<void> {
+  unwrap(await supabase.from('issues').update({ exclude_reason: reason }).eq('id', issueId).select())
+}

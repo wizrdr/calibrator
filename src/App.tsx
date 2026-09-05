@@ -5,6 +5,8 @@ import { JoinPage } from '@/features/room/JoinPage'
 import { SessionPage } from '@/features/room/SessionPage'
 import { TeamPage } from '@/features/team/TeamPage'
 import { TeamsPage } from '@/features/team/TeamsPage'
+import { ImportPage } from '@/features/import/ImportPage'
+import { ReportPage } from '@/features/report/ReportPage'
 import { auth } from '@/data/queries'
 import { Button } from '@/ui'
 
@@ -31,6 +33,8 @@ function Shell() {
       <Routes>
         <Route path="/" element={<TeamsPage />} />
         <Route path="/team/:teamId" element={<TeamPage />} />
+        <Route path="/team/:teamId/import" element={<ImportPage />} />
+        <Route path="/team/:teamId/report" element={<ReportPage />} />
         <Route path="/s/:sessionId" element={<SessionPage />} />
         <Route path="/j/:code" element={<JoinPage />} />
         <Route path="/join" element={<JoinPage />} />
