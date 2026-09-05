@@ -4,7 +4,7 @@ import { toJiraCsv } from '../src/domain/jiraCsv'
 import { DEMO_PARAMS } from '../src/domain/demoParams'
 
 async function signUpLead(page: Page) {
-  await page.goto('/')
+  await page.goto('')
   await page.getByRole('button', { name: /Зарегистрироваться/ }).click()
   await page.getByLabel('Email').fill(`e2e-synth-${Date.now()}@calibrator.test`)
   await page.getByLabel('Пароль').fill('E2e-passw0rd')

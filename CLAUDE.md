@@ -16,8 +16,11 @@ React 19 + Vite + TypeScript + Tailwind v4 + zustand + react-router. Supabase (P
 
 ## Команды
 ```
-npm run dev        # http://localhost:5174
-npm test
-npm run build
-npx supabase db push
+npm run dev        # http://localhost:5174 (5173 занят Dayline)
+npm test           # vitest, домен
+npm run rls        # 19 живых проверок RLS через supabase-js
+npm run e2e        # Playwright против localhost, 3 спека, workers=1
+BASE_URL=https://wizrdr.github.io/calibrator/ npm run e2e   # то же против живого сайта
+supabase db query --linked -f supabase/migrations/<file>.sql  # миграции без пароля БД, потом insert в supabase_migrations.schema_migrations
+supabase gen types typescript --linked > src/data/types.gen.ts
 ```

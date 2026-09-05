@@ -3,7 +3,7 @@ import { expect, test, type Browser, type Page } from '@playwright/test'
 // Runs against the linked Supabase project: every run creates a fresh facilitator account.
 
 async function signUpLead(page: Page) {
-  await page.goto('/')
+  await page.goto('')
   await page.getByRole('button', { name: /Зарегистрироваться/ }).click()
   await page.getByLabel('Email').fill(`e2e-${Date.now()}@calibrator.test`)
   await page.getByLabel('Пароль').fill('E2e-passw0rd')
@@ -26,7 +26,7 @@ async function createSession(page: Page): Promise<string> {
 async function join(browser: Browser, code: string, name: string): Promise<Page> {
   const ctx = await browser.newContext()
   const page = await ctx.newPage()
-  await page.goto(`/j/${code}`)
+  await page.goto(`j/${code}`)
   await page.getByLabel('Имя').fill(name)
   await page.getByRole('button', { name: 'Войти' }).click()
   await expect(page.getByText(name, { exact: true })).toBeVisible()

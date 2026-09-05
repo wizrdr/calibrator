@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 async function signUpLead(page: Page) {
-  await page.goto('/')
+  await page.goto('')
   await page.getByRole('button', { name: /Зарегистрироваться/ }).click()
   await page.getByLabel('Email').fill(`e2e-import-${Date.now()}@calibrator.test`)
   await page.getByLabel('Пароль').fill('E2e-passw0rd')
