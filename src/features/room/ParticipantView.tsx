@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { castVote, type Participant, type Room } from '@/data/queries'
 import { FIB, type Card as CardT } from '@/domain/scale'
+import { LangSwitch, useT } from '@/i18n'
 import { Button, Card, ErrorText, cn } from '@/ui'
+import { useCardLabel } from './cardLabel'
 import { currentIssue, seats } from './roomView'
 
-const label = (c: CardT | null) => (c === null ? '—' : c === 'coffee' ? 'перерыв' : c)
-
 export function ParticipantView({ room, me, reload }: { room: Room; me: Participant; reload: () => Promise<void> }) {
+  const { t } = useT()
+  const label = useCardLabel()
   const [error, setError] = useState<string | null>(null)
   const { session } = room
   const cur = currentIssue(room)
@@ -39,27 +41,30 @@ export function ParticipantView({ room, me, reload }: { room: Room; me: Particip
 
   return (
     <div className="mx-auto flex min-h-full max-w-md flex-col gap-4 px-4 py-5">
-      <div className="flex items-baseline justify-between text-[13px] text-muted">
-        <span>{session.sprint_name}</span>
-        <span>{me.display_name}</span>
+      <div className="flex items-center justify-between gap-3 text-[13px] text-muted">
+        <span className="truncate">{session.sprint_name}</span>
+        <span className="flex items-center gap-3">
+          <span>{me.display_name}</span>
+          <LangSwitch className="flex gap-0.5" />
+        </span>
       </div>
       <ErrorText error={error} />
 
       {!cur ? (
         <Card>
-          <p className="text-[15px] text-muted">
-            {session.state === 'done' ? 'Планирование закончено. Спасибо!' : 'Ждём, пока фасилитатор откроет задачу.'}
-          </p>
+          <p className="text-[15px] text-muted">{session.state === 'done' ? t('participant.finished') : t('participant.waiting')}</p>
         </Card>
       ) : (
         <>
           <Card className="flex flex-col gap-2">
             <span className="text-[13px] text-muted">
-              {cur.key} · раунд {session.round}
+              {cur.key} · {t('common.round', { n: session.round })}
             </span>
             <h1 className="text-lg font-semibold leading-snug">{cur.summary || cur.key}</h1>
             {!revealed && others.some((s) => s.voted) && (
-              <p className="text-[13px] font-medium text-accent-strong">Уже сдали: {others.filter((s) => s.voted).map((s) => s.name).join(', ')}</p>
+              <p className="text-[13px] font-medium text-accent-strong">
+                {t('participant.alreadyVoted', { names: others.filter((s) => s.voted).map((s) => s.name).join(', ') })}
+              </p>
             )}
           </Card>
 
@@ -71,7 +76,7 @@ export function ParticipantView({ room, me, reload }: { room: Room; me: Particip
                 {deck('coffee', true)}
               </div>
               <p className="text-center text-[13px] text-muted">
-                {mine?.card ? `Ваш голос: ${label(mine.card)}. Можно поменять до вскрытия.` : 'Выберите карту. Никто не видит её до вскрытия.'}
+                {mine?.card ? t('participant.yourVote', { card: label(mine.card) }) : t('participant.pickCard')}
               </p>
             </div>
           )}
@@ -87,9 +92,9 @@ export function ParticipantView({ room, me, reload }: { room: Room; me: Particip
                 ))}
               </ul>
               {cur.final_sp !== null ? (
-                <p className="mt-3 text-[15px] text-accent-strong">Итог команды: {cur.final_sp}</p>
+                <p className="mt-3 text-[15px] text-accent-strong">{t('participant.teamFinal', { n: cur.final_sp })}</p>
               ) : (
-                <p className="mt-3 text-[13px] text-muted">Фасилитатор выбирает итог.</p>
+                <p className="mt-3 text-[13px] text-muted">{t('participant.choosingFinal')}</p>
               )}
             </Card>
           )}

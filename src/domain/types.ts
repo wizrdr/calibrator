@@ -15,6 +15,12 @@ export type CurvePoint = { sp: number; n: number; median: number; q1: number; q3
 
 export type Scale = { k: number; n: number; thin: boolean }
 
+export type Verdict =
+  | { kind: 'few'; n: number }
+  | { kind: 'calibrated'; pct: number }
+  | { kind: 'under'; times: number }
+  | { kind: 'over'; times: number }
+
 export type Bias = {
   memberId: string
   factor: number
@@ -22,5 +28,5 @@ export type Bias = {
   hi: number
   n: number
   abstains: number
-  label: string
+  verdict: Verdict
 }

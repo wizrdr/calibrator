@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { auth } from '@/data/queries'
+import { LangSwitch, useT } from '@/i18n'
 import { Button, Card, ErrorText, Field, Input } from '@/ui'
 
 export function AuthPage() {
+  const { t } = useT()
   const [mode, setMode] = useState<'in' | 'up'>('in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,16 +24,19 @@ export function AuthPage() {
   return (
     <div className="mx-auto flex min-h-full max-w-md flex-col justify-center gap-6 px-4 py-8">
       <div className="flex flex-col gap-2">
-        <span className="text-lg font-semibold">Calibrator</span>
-        <h1 className="text-2xl font-semibold leading-tight text-balance">Planning poker, который помнит, кто как голосовал, и сверяет это с фактом из Jira</h1>
-        <p className="text-[15px] text-muted">Аккаунт нужен только фасилитатору. Команда входит по ссылке без регистрации.</p>
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-semibold">{t('auth.brand')}</span>
+          <LangSwitch className="flex gap-1 rounded-md bg-surface-raised p-0.5" />
+        </div>
+        <h1 className="text-2xl font-semibold leading-tight text-balance">{t('auth.tagline')}</h1>
+        <p className="text-[15px] text-muted">{t('auth.onlyFacilitator')}</p>
       </div>
       <Card>
         <form onSubmit={submit} className="flex flex-col gap-3">
-          <Field label="Email">
+          <Field label={t('auth.email')}>
             <Input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
-          <Field label="Пароль">
+          <Field label={t('auth.password')}>
             <Input
               type="password"
               autoComplete={mode === 'in' ? 'current-password' : 'new-password'}
@@ -43,17 +48,17 @@ export function AuthPage() {
           </Field>
           <ErrorText error={error} />
           <Button type="submit" size="lg" disabled={busy}>
-            {mode === 'in' ? 'Войти' : 'Создать аккаунт'}
+            {mode === 'in' ? t('auth.signIn') : t('auth.signUp')}
           </Button>
           <Button type="button" variant="ghost" onClick={() => setMode(mode === 'in' ? 'up' : 'in')}>
-            {mode === 'in' ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
+            {mode === 'in' ? t('auth.toSignUp') : t('auth.toSignIn')}
           </Button>
         </form>
       </Card>
       <p className="text-center text-[13px] text-muted">
-        Вас позвали на планирование?{' '}
+        {t('auth.invited')}{' '}
         <Link to="/join" className="text-accent">
-          Войти по коду
+          {t('auth.joinByCode')}
         </Link>
       </p>
     </div>

@@ -21,4 +21,12 @@ test('Jira CSV import matches issues by key and reports coverage', async ({ page
   await expect(page.getByText('IMP-9')).toBeVisible()
   await page.getByRole('button', { name: 'Применить к 2 задачам' }).click()
   await expect(page).toHaveURL(/\/calibration$/)
+
+  await page.getByRole('button', { name: 'en', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Team calibration' })).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Team calibration' })).toBeVisible()
+  await page.screenshot({ path: 'test-results/calibration-en.png', fullPage: true })
+  await page.getByRole('button', { name: 'ru', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Калибровка команды' })).toBeVisible()
 })

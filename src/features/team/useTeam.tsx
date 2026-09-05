@@ -60,13 +60,6 @@ export function useTeam(): TeamState {
   return v
 }
 
-export const stateLabel: Record<string, string> = {
-  lobby: 'ждём начала',
-  voting: 'голосуем',
-  revealed: 'вскрыто',
-  done: 'завершено',
-}
-
 export function activeSession(sessions: Session[]): Session | null {
   return sessions.find((s) => s.state !== 'done') ?? null
 }

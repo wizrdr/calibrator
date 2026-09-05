@@ -2,9 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { auth, joinSession } from '@/data/queries'
 import { supabase } from '@/data/supabase'
+import { LangSwitch, useT } from '@/i18n'
 import { Button, Card, ErrorText, Field, Input } from '@/ui'
 
 export function JoinPage() {
+  const { t } = useT()
   const { code: codeParam = '' } = useParams()
   const navigate = useNavigate()
   const [code, setCode] = useState(codeParam.toUpperCase())
@@ -27,7 +29,7 @@ export function JoinPage() {
       navigate(`/s/${sessionId}`)
     } catch (err) {
       const msg = (err as Error).message
-      setError(msg.includes('no such session') ? 'Планирование с таким кодом не найдено. Проверьте код у фасилитатора.' : msg)
+      setError(msg.includes('no such session') ? t('join.notFound') : msg)
     } finally {
       setBusy(false)
     }
@@ -36,22 +38,25 @@ export function JoinPage() {
   return (
     <div className="mx-auto flex min-h-full max-w-md flex-col justify-center px-4 py-8">
       <Card className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-xl font-semibold">Войти в планирование</h1>
-          <p className="mt-1 text-[15px] text-muted">Без аккаунта: код от фасилитатора и имя, под которым вас знает команда.</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-semibold">{t('join.title')}</h1>
+            <p className="mt-1 text-[15px] text-muted">{t('join.subtitle')}</p>
+          </div>
+          <LangSwitch className="flex shrink-0 gap-1 rounded-md bg-surface-raised p-0.5" />
         </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
           {!codeParam && (
-            <Field label="Код">
+            <Field label={t('join.code')}>
               <Input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className="font-mono uppercase tracking-wider" required />
             </Field>
           )}
-          <Field label="Имя">
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Как в команде" required autoFocus />
+          <Field label={t('join.name')}>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('join.namePlaceholder')} required autoFocus />
           </Field>
           <ErrorText error={error} />
           <Button type="submit" size="lg" disabled={busy}>
-            Войти
+            {t('join.submit')}
           </Button>
         </form>
       </Card>

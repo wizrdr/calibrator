@@ -54,7 +54,7 @@ describe('buildReport', () => {
     const bob = r.biasVsFact.find((b) => b.memberId === 'name:Bob')!
     expect(ann.n).toBe(8)
     expect(ann.factor).toBeLessThan(0.75)
-    expect(bob.label).toMatch(/^калиброван/)
+    expect(bob.verdict.kind).toBe('calibrated')
   })
 
   it('reports carry-over, top miss and estimate drift', () => {

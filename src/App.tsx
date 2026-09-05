@@ -10,6 +10,7 @@ import { HomePage } from '@/features/team/HomePage'
 import { NewSessionPage } from '@/features/team/NewSessionPage'
 import { SettingsPage } from '@/features/team/SettingsPage'
 import { TeamProvider } from '@/features/team/useTeam'
+import { LangProvider } from '@/i18n'
 
 function Facilitator() {
   return (
@@ -49,8 +50,10 @@ function Root() {
 
 export default function App() {
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-      <Root />
-    </BrowserRouter>
+    <LangProvider>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+        <Root />
+      </BrowserRouter>
+    </LangProvider>
   )
 }

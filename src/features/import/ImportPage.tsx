@@ -4,9 +4,11 @@ import { applyFacts } from '@/data/queries'
 import { matchImport, type ImportPreview } from '@/domain/importFacts'
 import { parseJiraCsv, parseJiraDate } from '@/domain/jiraCsv'
 import { useTeam } from '@/features/team/useTeam'
+import { useT } from '@/i18n'
 import { Button, Card, ErrorText, PageHeader, Stat } from '@/ui'
 
 export function ImportPage() {
+  const { t } = useT()
   const { issues, refresh } = useTeam()
   const navigate = useNavigate()
   const [preview, setPreview] = useState<ImportPreview | null>(null)
@@ -49,13 +51,13 @@ export function ImportPage() {
 
   return (
     <>
-      <PageHeader title="Загрузить факт из Jira" subtitle={`Строки CSV сопоставим по ключу с ${issues.length} задачами, которые команда оценивала.`} />
+      <PageHeader title={t('import.title')} subtitle={t('import.subtitle', { n: issues.length })} />
       <ErrorText error={error} />
       <Card className="flex flex-col gap-3">
         <ol className="flex flex-col gap-1 text-[15px] text-muted">
-          <li>1. В Jira: Issues → фильтр по спринту → Export → CSV (all fields).</li>
-          <li>2. Нужны колонки Issue key, Story Points, Time Spent, Sprint, Status, Resolved.</li>
-          <li>3. Загрузите файл сюда. Ничего не сохранится, пока не нажмёте «Применить».</li>
+          <li>{t('import.step1')}</li>
+          <li>{t('import.step2')}</li>
+          <li>{t('import.step3')}</li>
         </ol>
         <input type="file" accept=".csv,text/csv" data-testid="csv" onChange={(e) => onFile(e.target.files?.[0])} className="text-[15px]" />
       </Card>
@@ -63,19 +65,19 @@ export function ImportPage() {
       {preview && (
         <Card className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4" data-testid="preview">
-            <Stat label="Совпало по ключу" value={String(preview.matched.length)} />
-            <Stat label="Из них с часами" value={String(preview.withFact)} />
-            <Stat label="Покрытие" value={`${Math.round(preview.coverage * 100)}%`} testId="coverage" sub="оценённых задач с фактом" />
-            <Stat label="Не оценивались" value={String(preview.unmatchedKeys.length)} sub="пропустим" />
+            <Stat label={t('import.matched')} value={String(preview.matched.length)} />
+            <Stat label={t('import.withHours')} value={String(preview.withFact)} />
+            <Stat label={t('import.coverage')} value={`${Math.round(preview.coverage * 100)}%`} testId="coverage" sub={t('import.coverageSub')} />
+            <Stat label={t('import.unmatched')} value={String(preview.unmatchedKeys.length)} sub={t('import.skip')} />
           </div>
           {preview.missingKeys.length > 0 && (
             <p className="text-[13px] text-muted">
-              Оценены, но в CSV нет: <span className="font-mono">{preview.missingKeys.join(', ')}</span>
+              {t('import.missing')} <span className="font-mono">{preview.missingKeys.join(', ')}</span>
             </p>
           )}
           {preview.unmatchedKeys.length > 0 && (
             <p className="text-[13px] text-muted">
-              В CSV, но не оценивались: <span className="font-mono">{preview.unmatchedKeys.slice(0, 20).join(', ')}</span>
+              {t('import.extra')} <span className="font-mono">{preview.unmatchedKeys.slice(0, 20).join(', ')}</span>
               {preview.unmatchedKeys.length > 20 && ' …'}
             </p>
           )}
@@ -83,11 +85,11 @@ export function ImportPage() {
             <table className="w-full text-[14px]">
               <thead className="sticky top-0 bg-surface-raised text-left text-[13px] text-muted">
                 <tr>
-                  <th className="px-3 py-2 font-medium">Ключ</th>
-                  <th className="px-3 py-2 font-medium">SP</th>
-                  <th className="px-3 py-2 font-medium">Часы</th>
-                  <th className="px-3 py-2 font-medium">Спринтов</th>
-                  <th className="px-3 py-2 font-medium">Статус</th>
+                  <th className="px-3 py-2 font-medium">{t('import.key')}</th>
+                  <th className="px-3 py-2 font-medium">{t('import.sp')}</th>
+                  <th className="px-3 py-2 font-medium">{t('import.hours')}</th>
+                  <th className="px-3 py-2 font-medium">{t('import.sprints')}</th>
+                  <th className="px-3 py-2 font-medium">{t('import.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -105,7 +107,7 @@ export function ImportPage() {
           </div>
           <div className="flex justify-end">
             <Button size="lg" onClick={apply} disabled={busy || preview.matched.length === 0}>
-              Применить к {preview.matched.length} задачам
+              {t('import.apply', { n: preview.matched.length })}
             </Button>
           </div>
         </Card>

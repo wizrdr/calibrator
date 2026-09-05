@@ -4,6 +4,7 @@ import { listMembers, listTeamParticipants, listTeamVotes, setExcludeReason } fr
 import { buildReport, type Report } from '@/domain/report'
 import { seedDemo } from '@/features/demo/seedDemo'
 import { useTeam } from '@/features/team/useTeam'
+import { useT } from '@/i18n'
 import { Button, Card, Empty, ErrorText, PageHeader, Stat, cn } from '@/ui'
 import { BiasTable } from './BiasTable'
 import { CurveChart } from './CurveChart'
@@ -11,6 +12,7 @@ import { CurveChart } from './CurveChart'
 type Raw = Parameters<typeof buildReport>[0]
 
 export function ReportPage() {
+  const { t } = useT()
   const { team, issues, sessions, refresh } = useTeam()
   const [raw, setRaw] = useState<Raw | null>(null)
   const [round, setRound] = useState<'first' | 'last'>('first')
@@ -52,47 +54,43 @@ export function ReportPage() {
   }
 
   if (error) return <ErrorText error={error} />
-  if (!raw) return <p className="text-sm text-muted">Загрузка…</p>
+  if (!raw) return <p className="text-sm text-muted">{t('common.loading')}</p>
   const r: Report = buildReport(raw, { round })
 
   if (r.estimated === 0) {
     return (
       <>
-        <PageHeader title="Калибровка команды" />
+        <PageHeader title={t('report.title')} />
         <Empty
-          title="Пока нечего калибровать"
+          title={t('report.emptyTitle')}
           action={
             <div className="flex flex-wrap gap-2">
               <Link to="/new">
-                <Button>Новое планирование</Button>
+                <Button>{t('home.newPlanning')}</Button>
               </Link>
               <Button variant="secondary" onClick={demo} disabled={busy} data-testid="demo">
-                {busy ? 'Создаём пример…' : 'Посмотреть на примере'}
+                {busy ? t('report.demoBusy') : t('report.demo')}
               </Button>
             </div>
           }
         >
-          Здесь появится, сколько часов у вашей команды занимает один story point и кто системно занижает или завышает оценки. Нужно
-          хотя бы одно планирование и факт из Jira. Пример покажет всё на выдуманной команде из трёх человек.
+          {t('report.emptyBody')}
         </Empty>
       </>
     )
   }
 
   const k = r.scale.k
+  const pct = (x: number) => Math.round(x * 100)
   return (
     <>
       <PageHeader
-        title="Калибровка команды"
-        subtitle={
-          r.withFact === 0
-            ? 'Голоса есть, факта из Jira ещё нет: пока видно только, кто спорит с командой.'
-            : `По ${r.withFact} задачам с фактом из ${r.estimated} оценённых.`
-        }
+        title={t('report.title')}
+        subtitle={r.withFact === 0 ? t('report.noFactsYet') : t('report.byIssues', { withFact: r.withFact, estimated: r.estimated })}
         actions={
           r.withFact < r.estimated && (
             <Link to="/import">
-              <Button variant="secondary">Загрузить факт из Jira</Button>
+              <Button variant="secondary">{t('report.loadFacts')}</Button>
             </Link>
           )
         }
@@ -100,17 +98,21 @@ export function ReportPage() {
 
       {r.withFact > 0 && (
         <Card className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Stat label="Один story point у вас" value={Number.isFinite(k) ? `≈ ${k.toFixed(1)} ч` : '—'} sub={r.scale.thin ? 'мало данных, оценка грубая' : `по ${r.scale.n} задачам`} />
-          <Stat label="Факт есть у" value={`${r.withFact} из ${r.estimated}`} sub={`покрытие ${Math.round(r.coverage * 100)}%`} testId="coverage" />
-          <Stat label="Переехали в другой спринт" value={String(r.carryOver.count)} sub={`${Math.round(r.carryOver.hoursShare * 100)}% всех часов`} />
-          <Stat label="Планирований" value={String(sessions.length)} />
+          <Stat
+            label={t('report.spHours')}
+            value={Number.isFinite(k) ? `≈ ${k.toFixed(1)} ${t('report.hoursShort')}` : '—'}
+            sub={r.scale.thin ? t('report.thin') : t('report.byN', { n: r.scale.n })}
+          />
+          <Stat label={t('report.factOf')} value={t('report.ofTotal', { a: r.withFact, b: r.estimated })} sub={t('report.coverage', { pct: pct(r.coverage) })} testId="coverage" />
+          <Stat label={t('report.carryOver')} value={String(r.carryOver.count)} sub={t('report.hoursShare', { pct: pct(r.carryOver.hoursShare) })} />
+          <Stat label={t('report.plannings')} value={String(sessions.length)} />
         </Card>
       )}
 
       {r.withFact > 0 && (
         <Card>
-          <h2 className="font-semibold">Сколько часов занимает задача на N story points</h2>
-          <p className="mb-3 text-[13px] text-muted">Столбик — медиана часов, усы — половина задач вокруг неё. Серые: меньше трёх задач, не доверяйте.</p>
+          <h2 className="font-semibold">{t('report.curveTitle')}</h2>
+          <p className="mb-3 text-[13px] text-muted">{t('report.curveBody')}</p>
           <CurveChart curve={r.curve} k={k} />
         </Card>
       )}
@@ -119,11 +121,8 @@ export function ReportPage() {
         <Card>
           <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h2 className="font-semibold">Кто как голосует относительно факта</h2>
-              <p className="max-w-[64ch] text-[13px] text-muted">
-                Часы задачи переводим в story points по кривой команды и сравниваем с голосом человека. «Занижает в 1.8×» значит: его карта в
-                медиане в 1.8 раза меньше того, во что задача обошлась. Всё относительно команды, а не абсолютной шкалы.
-              </p>
+              <h2 className="font-semibold">{t('report.biasFactTitle')}</h2>
+              <p className="max-w-[64ch] text-[13px] text-muted">{t('report.biasFactBody')}</p>
             </div>
             <div className="flex rounded-md bg-surface-raised p-0.5 text-[13px]">
               {(['first', 'last'] as const).map((v) => (
@@ -133,7 +132,7 @@ export function ReportPage() {
                   onClick={() => setRound(v)}
                   className={cn('rounded-sm px-3 py-1.5', round === v ? 'bg-surface font-medium shadow-sm' : 'text-muted')}
                 >
-                  {v === 'first' ? 'первый раунд' : 'последний раунд'}
+                  {v === 'first' ? t('report.firstRound') : t('report.lastRound')}
                 </button>
               ))}
             </div>
@@ -143,15 +142,15 @@ export function ReportPage() {
       )}
 
       <Card>
-        <h2 className="font-semibold">Кто как голосует относительно итога команды</h2>
-        <p className="mb-3 max-w-[64ch] text-[13px] text-muted">Не требует Jira: сравниваем карту человека с тем, на чём команда сошлась. Показывает, кто спорит и в какую сторону.</p>
+        <h2 className="font-semibold">{t('report.biasFinalTitle')}</h2>
+        <p className="mb-3 max-w-[64ch] text-[13px] text-muted">{t('report.biasFinalBody')}</p>
         <BiasTable rows={r.biasVsFinal} names={r.names} testId="bias-final" />
       </Card>
 
       {r.withFact > 0 && (
         <div className="grid gap-5 md:grid-cols-2">
           <Card>
-            <h2 className="mb-3 font-semibold">Самые большие промахи</h2>
+            <h2 className="mb-3 font-semibold">{t('report.missesTitle')}</h2>
             <ul className="flex flex-col gap-2 text-[15px]">
               {r.topMisses.map((m) => (
                 <li key={m.key} className="flex justify-between gap-3">
@@ -159,20 +158,20 @@ export function ReportPage() {
                     <span className="text-muted">{m.key}</span> {m.summary}
                   </span>
                   <span className="whitespace-nowrap tabular-nums text-muted">
-                    {m.finalSp} SP → {m.hours.toFixed(0)} ч ≈ {m.impliedSp.toFixed(1)} SP
+                    {t('report.miss', { sp: m.finalSp, hours: m.hours.toFixed(0), implied: m.impliedSp.toFixed(1) })}
                   </span>
                 </li>
               ))}
             </ul>
           </Card>
           <Card>
-            <h2 className="mb-1 font-semibold">Оценены, но факта нет</h2>
-            <p className="mb-3 text-[13px] text-muted">Не закрыты в Jira или без списанных часов. Разбитые на подзадачи лучше исключить.</p>
+            <h2 className="mb-1 font-semibold">{t('report.noFactTitle')}</h2>
+            <p className="mb-3 text-[13px] text-muted">{t('report.noFactBody')}</p>
             {r.drift.length > 0 && (
               <ul className="mb-3 flex flex-col gap-1 text-[15px]">
                 {r.drift.map((d) => (
                   <li key={d.key} className="flex justify-between">
-                    <span className="text-muted">{d.key} переоценена</span>
+                    <span className="text-muted">{t('report.drift', { key: d.key })}</span>
                     <span className="tabular-nums">
                       {d.first} → {d.last}
                     </span>
@@ -181,14 +180,14 @@ export function ReportPage() {
               </ul>
             )}
             {r.unresolvedWithEstimate.length === 0 ? (
-              <p className="text-[15px] text-muted">У всех оценённых задач есть факт.</p>
+              <p className="text-[15px] text-muted">{t('report.allHaveFact')}</p>
             ) : (
               <ul className="flex flex-col gap-1 text-[15px]">
                 {r.unresolvedWithEstimate.map((key) => (
                   <li key={key} className="flex items-center justify-between">
                     <span className="font-mono">{key}</span>
                     <Button variant="ghost" size="sm" onClick={() => exclude(key)}>
-                      исключить
+                      {t('report.exclude')}
                     </Button>
                   </li>
                 ))}

@@ -60,7 +60,7 @@ describe('personBias', () => {
     expect(ann.lo).toBeCloseTo(0.5, 6)
     expect(ann.hi).toBeCloseTo(0.5, 6)
     expect(ann.n).toBe(8)
-    expect(ann.label).toBe('занижает в 2.0×')
+    expect(ann.verdict).toEqual({ kind: 'under', times: 2 })
   })
 
   it('labels a member as calibrated when the band covers 1', () => {
@@ -70,7 +70,7 @@ describe('personBias', () => {
     }))
     const [bob] = personBias(votes, exact)
     expect(bob.factor).toBe(1)
-    expect(bob.label).toBe('калиброван ±0%')
+    expect(bob.verdict).toEqual({ kind: 'calibrated', pct: 0 })
   })
 
   it('labels overestimates and reports too little data', () => {
@@ -82,8 +82,8 @@ describe('personBias', () => {
     const [cid] = personBias(votes, ref)
     expect(cid.n).toBe(3)
     expect(cid.factor).toBeCloseTo(4 / 3, 6)
-    expect(cid.label).toBe('недостаточно данных (3)')
-    expect(personBias(votes, ref, { minN: 3 })[0].label).toBe('завышает в 1.3×')
+    expect(cid.verdict).toEqual({ kind: 'few', n: 3 })
+    expect(personBias(votes, ref, { minN: 3 })[0].verdict).toEqual({ kind: 'over', times: 1.3 })
   })
 
   it('counts abstains separately and ignores issues without a reference', () => {

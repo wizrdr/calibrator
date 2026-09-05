@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { listMembers, mergeMembers, updateTeam, type Member } from '@/data/queries'
+import { useT } from '@/i18n'
 import { Button, Card, ErrorText, Field, Input, PageHeader } from '@/ui'
 import { useTeam } from './useTeam'
 
 export function SettingsPage() {
+  const { t } = useT()
   const { team, refresh } = useTeam()
   const [name, setName] = useState(team?.name ?? '')
   const [members, setMembers] = useState<Member[]>([])
@@ -50,30 +52,38 @@ export function SettingsPage() {
     }
   }
 
+  const select = (value: string, onChange: (v: string) => void, options: Member[]) => (
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="min-h-11 rounded-md border border-border bg-surface px-3">
+      <option value="">{t('settings.choose')}</option>
+      {options.map((m) => (
+        <option key={m.id} value={m.id}>
+          {m.name}
+        </option>
+      ))}
+    </select>
+  )
+
   return (
     <>
-      <PageHeader title="Настройки" />
+      <PageHeader title={t('settings.title')} />
       <ErrorText error={error} />
       <Card>
         <form onSubmit={rename} className="flex flex-wrap items-end gap-3">
           <div className="min-w-60 flex-1">
-            <Field label="Название команды">
+            <Field label={t('settings.teamName')}>
               <Input value={name} onChange={(e) => setName(e.target.value)} required />
             </Field>
           </div>
           <Button type="submit" variant="secondary">
-            {saved ? 'Сохранено' : 'Сохранить'}
+            {saved ? t('common.saved') : t('common.save')}
           </Button>
         </form>
       </Card>
       <Card>
-        <h2 className="mb-1 font-semibold">Люди в команде</h2>
-        <p className="mb-4 text-[13px] text-muted">
-          Список собирается сам из имён, которые люди вводят при входе. Если один человек вошёл под двумя именами, объедините их: голоса
-          сложатся.
-        </p>
+        <h2 className="mb-1 font-semibold">{t('settings.peopleTitle')}</h2>
+        <p className="mb-4 text-[13px] text-muted">{t('settings.peopleBody')}</p>
         {members.length === 0 ? (
-          <p className="text-[15px] text-muted">Пока никто не входил.</p>
+          <p className="text-[15px] text-muted">{t('settings.nobody')}</p>
         ) : (
           <ul className="mb-4 flex flex-wrap gap-2">
             {members.map((m) => (
@@ -85,30 +95,10 @@ export function SettingsPage() {
         )}
         {members.length > 1 && (
           <div className="flex flex-wrap items-end gap-3">
-            <Field label="Объединить">
-              <select value={from} onChange={(e) => setFrom(e.target.value)} className="min-h-11 rounded-md border border-border bg-surface px-3">
-                <option value="">выберите</option>
-                {members.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="с">
-              <select value={into} onChange={(e) => setInto(e.target.value)} className="min-h-11 rounded-md border border-border bg-surface px-3">
-                <option value="">выберите</option>
-                {members
-                  .filter((m) => m.id !== from)
-                  .map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-              </select>
-            </Field>
+            <Field label={t('settings.merge')}>{select(from, setFrom, members)}</Field>
+            <Field label={t('settings.mergeWith')}>{select(into, setInto, members.filter((m) => m.id !== from))}</Field>
             <Button variant="secondary" onClick={merge} disabled={!from || !into}>
-              Объединить
+              {t('settings.merge')}
             </Button>
           </div>
         )}

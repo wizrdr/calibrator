@@ -1,6 +1,6 @@
 import { cardValue } from './scale'
 import { median, medianBand, quantile } from './stats'
-import type { Bias, CurvePoint, FactIssue, Scale, VoteRec } from './types'
+import type { Bias, CurvePoint, FactIssue, Scale, Verdict, VoteRec } from './types'
 
 const MIN_N = 8
 const MIN_DISTINCT_SP = 3
@@ -71,27 +71,18 @@ export function personBias(
     .map(([memberId, { logs, abstains }]) => {
       const n = logs.length
       const band = medianBand(logs)
-      const bias: Bias = {
-        memberId,
-        factor: Math.exp(median(logs)),
-        lo: Math.exp(band.lo),
-        hi: Math.exp(band.hi),
-        n,
-        abstains,
-        label: '',
-      }
-      bias.label = labelBias(bias, minN)
-      return bias
+      const factor = Math.exp(median(logs))
+      const lo = Math.exp(band.lo)
+      const hi = Math.exp(band.hi)
+      return { memberId, factor, lo, hi, n, abstains, verdict: verdictOf({ factor, lo, hi, n }, minN) }
     })
     .sort((a, b) => a.memberId.localeCompare(b.memberId))
 }
 
-export function labelBias(b: Bias, minN = MIN_N): string {
-  if (b.n < minN) return `недостаточно данных (${b.n})`
-  if (b.lo <= 1 && 1 <= b.hi) {
-    const pct = Math.round((b.hi / b.factor - 1) * 100)
-    return `калиброван ±${pct}%`
-  }
-  if (b.factor < 1) return `занижает в ${(1 / b.factor).toFixed(1)}×`
-  return `завышает в ${b.factor.toFixed(1)}×`
+// The verdict is data; the UI puts words on it in the viewer's language.
+export function verdictOf(b: { factor: number; lo: number; hi: number; n: number }, minN = MIN_N): Verdict {
+  if (b.n < minN) return { kind: 'few', n: b.n }
+  if (b.lo <= 1 && 1 <= b.hi) return { kind: 'calibrated', pct: Math.round((b.hi / b.factor - 1) * 100) }
+  if (b.factor < 1) return { kind: 'under', times: Number((1 / b.factor).toFixed(1)) }
+  return { kind: 'over', times: Number(b.factor.toFixed(1)) }
 }

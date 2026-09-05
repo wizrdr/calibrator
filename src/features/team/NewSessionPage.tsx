@@ -2,11 +2,13 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createSession } from '@/data/queries'
 import { parseJiraCsv } from '@/domain/jiraCsv'
+import { useT } from '@/i18n'
 import { Button, Card, ErrorText, Field, Input, PageHeader, Textarea } from '@/ui'
 import { parseIssueLines } from './parseIssueLines'
 import { useTeam } from './useTeam'
 
 export function NewSessionPage() {
+  const { t } = useT()
   const { team, refresh } = useTeam()
   const navigate = useNavigate()
   const [sprint, setSprint] = useState('')
@@ -42,29 +44,29 @@ export function NewSessionPage() {
   const n = parseIssueLines(issuesText).length
   return (
     <>
-      <PageHeader title="Новое планирование" subtitle="Задачи можно вставить списком или загрузить CSV бэклога из Jira." />
+      <PageHeader title={t('newSession.title')} subtitle={t('newSession.subtitle')} />
       <Card>
         <form onSubmit={submit} className="flex flex-col gap-4">
-          <Field label="Спринт">
-            <Input value={sprint} onChange={(e) => setSprint(e.target.value)} placeholder="Sprint 42" required autoFocus />
+          <Field label={t('newSession.sprint')}>
+            <Input value={sprint} onChange={(e) => setSprint(e.target.value)} placeholder={t('newSession.sprintPlaceholder')} required autoFocus />
           </Field>
-          <Field label="Задачи" hint="По одной в строке: ключ, потом название. Ключ нужен, чтобы потом сопоставить с фактом из Jira.">
+          <Field label={t('newSession.issues')} hint={t('newSession.issuesHint')}>
             <Textarea
               rows={9}
               value={issuesText}
               onChange={(e) => setIssuesText(e.target.value)}
-              placeholder={'CAL-101 Форма входа\nCAL-102 Флаки-тест в CI'}
+              placeholder={t('newSession.issuesPlaceholder')}
               className="font-mono text-sm"
             />
           </Field>
           <ErrorText error={error} />
           <div className="flex flex-wrap items-center justify-between gap-3">
             <label className="text-[13px] text-muted">
-              <span className="mr-2">или CSV бэклога:</span>
+              <span className="mr-2">{t('newSession.orCsv')}</span>
               <input type="file" accept=".csv,text/csv" data-testid="csv-backlog" onChange={(e) => onCsv(e.target.files?.[0])} />
             </label>
             <Button type="submit" size="lg" disabled={busy || n === 0}>
-              Начать планирование{n > 0 ? ` · ${n} задач` : ''}
+              {n > 0 ? t('newSession.startCount', { n }) : t('newSession.start')}
             </Button>
           </div>
         </form>

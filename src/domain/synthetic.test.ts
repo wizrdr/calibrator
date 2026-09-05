@@ -52,9 +52,9 @@ describe('generateSynthetic', () => {
   it('recovers the observable bias from noisy data and separates the three people', () => {
     const { ann, bob, cid } = recover(base)
     expect(Math.abs(Math.log(ann.factor / target.ann.factor))).toBeLessThan(0.12)
-    expect(ann.label).toMatch(/^занижает в/)
-    expect(bob.label).toMatch(/^калиброван/)
-    expect(cid.label).toMatch(/^завышает в/)
+    expect(ann.verdict.kind).toBe('under')
+    expect(bob.verdict.kind).toBe('calibrated')
+    expect(cid.verdict.kind).toBe('over')
     expect(ann.hi).toBeLessThan(1)
     expect(cid.lo).toBeGreaterThan(1)
   })
