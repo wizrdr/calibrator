@@ -16,7 +16,7 @@ React 19 + Vite + TypeScript + Tailwind v4 + zustand + react-router. Supabase (P
 
 ## Команды
 ```
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5174
 npm test
 npm run build
 npx supabase db push

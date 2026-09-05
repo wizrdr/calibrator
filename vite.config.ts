@@ -7,6 +7,7 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  server: { port: 5174, strictPort: true },
   plugins: [react(), tailwindcss()],
   test: {
     environment: 'jsdom',

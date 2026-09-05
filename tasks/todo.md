@@ -22,11 +22,21 @@
 - [x] Проверено в браузере: лид создаёт команду и сессию, участник из чистого контекста входит по коду, оба видят «участников: 1»
 - [x] GitHub Pages включён (build_type=workflow), переменные VITE_SUPABASE_* в Actions, деплой зелёный: https://wizrdr.github.io/calibrator/
 ## Сессия 3 — комната
+- [x] `data/room.ts`: realtime poke → полный reload, resubscribe на CHANNEL_ERROR/TIMED_OUT
+- [x] FacilitatorView: код и ссылка, список задач, текущая задача, кто проголосовал (✓ до reveal), Вскрыть, Переголосовать (round+1), итог → следующая задача → done
+- [x] ParticipantView: колода 1 2 3 5 8 13 ? ☕, своя карта подсвечена, после reveal все карты и итог
+- [x] `roomView.ts` (seats, currentIssue, nextIssue) с тестами
+- [x] Playwright `e2e/room.spec.ts`, два browser context: карта у фасилитатора появляется только после reveal, у второго участника тоже; итог переключает задачу у всех. 1 passed, 9.7s
+- [x] Dev-порт 5174 (5173 занят Dayline)
 ## Сессия 4 — импорт
 ## Сессия 5 — отчёт
 ## Сессия 6 — e2e + деплой
 
 ## Review
+
+### Сессия 3 (05.09.2026)
+- Фасилитатор = любой не-анонимный пользователь, читающий сессию (RLS пускает только owner). Роль «лид тоже голосует» отложена.
+- e2e ходит в живой Supabase и создаёт аккаунт на каждый прогон; в CI не запускается, только локально `npm run e2e`.
 
 ### Сессия 2 (05.09.2026)
 - Миграция применена через `supabase db query --linked` (Management API, без пароля БД); история записана в `supabase_migrations.schema_migrations` вручную, чтобы `db push` дальше работал.

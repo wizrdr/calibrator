@@ -76,3 +76,33 @@ export async function loadRoom(sessionId: string): Promise<Room> {
   ])
   return { session: unwrap(session), issues: unwrap(issues), participants: unwrap(participants), votes: unwrap(votes) }
 }
+
+export async function startVoting(sessionId: string, issueId: string, round = 1): Promise<void> {
+  unwrap(await supabase.from('sessions').update({ state: 'voting', current_issue_id: issueId, round }).eq('id', sessionId).select())
+}
+
+export async function reveal(sessionId: string): Promise<void> {
+  unwrap(await supabase.from('sessions').update({ state: 'revealed' }).eq('id', sessionId).select())
+}
+
+export async function setFinal(issueId: string, finalSp: number | null): Promise<void> {
+  unwrap(await supabase.from('issues').update({ final_sp: finalSp }).eq('id', issueId).select())
+}
+
+export async function finishSession(sessionId: string): Promise<void> {
+  unwrap(await supabase.from('sessions').update({ state: 'done', current_issue_id: null }).eq('id', sessionId).select())
+}
+
+export type CastVote = { sessionId: string; issueId: string; participantId: string; round: number; card: string }
+
+export async function castVote(v: CastVote): Promise<void> {
+  unwrap(
+    await supabase
+      .from('votes')
+      .upsert(
+        { session_id: v.sessionId, issue_id: v.issueId, participant_id: v.participantId, round: v.round, card: v.card },
+        { onConflict: 'issue_id,participant_id,round' },
+      )
+      .select(),
+  )
+}
