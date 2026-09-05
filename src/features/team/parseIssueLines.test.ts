@@ -1,4 +1,4 @@
-import { parseIssueLines } from './TeamPage'
+import { parseIssueLines } from './parseIssueLines'
 
 describe('parseIssueLines', () => {
   it('splits key and summary, skipping blank lines', () => {

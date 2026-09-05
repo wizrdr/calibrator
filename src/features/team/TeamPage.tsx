@@ -7,23 +7,12 @@ import {
   listMembers,
   listSessions,
   type Member,
-  type NewIssue,
   type Session,
   type Team,
 } from '@/data/queries'
 import { parseJiraCsv } from '@/domain/jiraCsv'
+import { parseIssueLines } from './parseIssueLines'
 import { Button, Card, ErrorText, Field, Input, Textarea } from '@/ui'
-
-export function parseIssueLines(text: string): NewIssue[] {
-  return text
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => {
-      const [key, ...rest] = l.split(/\s+/)
-      return { key, summary: rest.join(' ') }
-    })
-}
 
 export function TeamPage() {
   const { teamId = '' } = useParams()
