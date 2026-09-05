@@ -1,24 +1,20 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { applyFacts, listTeamIssues, type Issue } from '@/data/queries'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { applyFacts } from '@/data/queries'
 import { matchImport, type ImportPreview } from '@/domain/importFacts'
 import { parseJiraCsv, parseJiraDate } from '@/domain/jiraCsv'
-import { Button, Card, ErrorText } from '@/ui'
+import { useTeam } from '@/features/team/useTeam'
+import { Button, Card, ErrorText, PageHeader, Stat } from '@/ui'
 
 export function ImportPage() {
-  const { teamId = '' } = useParams()
+  const { issues, refresh } = useTeam()
   const navigate = useNavigate()
-  const [issues, setIssues] = useState<Issue[] | null>(null)
   const [preview, setPreview] = useState<ImportPreview | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  useEffect(() => {
-    listTeamIssues(teamId).then(setIssues).catch((e) => setError((e as Error).message))
-  }, [teamId])
-
   async function onFile(file: File | undefined) {
-    if (!file || !issues) return
+    if (!file) return
     setError(null)
     try {
       setPreview(matchImport(parseJiraCsv(await file.text()), issues))
@@ -42,7 +38,8 @@ export function ImportPage() {
           resolved_at: parseJiraDate(row.resolved),
         })),
       )
-      navigate(`/team/${teamId}/report`)
+      await refresh()
+      navigate('/calibration')
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -51,51 +48,46 @@ export function ImportPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-baseline justify-between">
-        <h1 className="text-xl font-semibold">Импорт факта из Jira</h1>
-        <Link to={`/team/${teamId}`} className="text-sm text-muted hover:text-text">
-          ← команда
-        </Link>
-      </div>
+    <>
+      <PageHeader title="Загрузить факт из Jira" subtitle={`Строки CSV сопоставим по ключу с ${issues.length} задачами, которые команда оценивала.`} />
       <ErrorText error={error} />
-
-      <Card>
-        <p className="mb-3 text-sm text-muted">
-          Экспорт CSV из Jira (Issues → Export → CSV, all fields). Нужны колонки Issue key, Story Points, Time Spent, Sprint, Status,
-          Resolved. Строки матчатся по ключу с задачами этой команды: {issues?.length ?? '…'} оценённых.
-        </p>
-        <input type="file" accept=".csv,text/csv" data-testid="csv" onChange={(e) => onFile(e.target.files?.[0])} className="text-sm" />
+      <Card className="flex flex-col gap-3">
+        <ol className="flex flex-col gap-1 text-[15px] text-muted">
+          <li>1. В Jira: Issues → фильтр по спринту → Export → CSV (all fields).</li>
+          <li>2. Нужны колонки Issue key, Story Points, Time Spent, Sprint, Status, Resolved.</li>
+          <li>3. Загрузите файл сюда. Ничего не сохранится, пока не нажмёте «Применить».</li>
+        </ol>
+        <input type="file" accept=".csv,text/csv" data-testid="csv" onChange={(e) => onFile(e.target.files?.[0])} className="text-[15px]" />
       </Card>
 
       {preview && (
-        <Card>
-          <dl className="mb-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4" data-testid="preview">
-            <Stat label="Совпало" value={String(preview.matched.length)} />
-            <Stat label="С фактом" value={String(preview.withFact)} />
-            <Stat label="Coverage" value={`${Math.round(preview.coverage * 100)}%`} testId="coverage" />
-            <Stat label="Не в командe" value={String(preview.unmatchedKeys.length)} />
-          </dl>
+        <Card className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4" data-testid="preview">
+            <Stat label="Совпало по ключу" value={String(preview.matched.length)} />
+            <Stat label="Из них с часами" value={String(preview.withFact)} />
+            <Stat label="Покрытие" value={`${Math.round(preview.coverage * 100)}%`} testId="coverage" sub="оценённых задач с фактом" />
+            <Stat label="Не оценивались" value={String(preview.unmatchedKeys.length)} sub="пропустим" />
+          </div>
           {preview.missingKeys.length > 0 && (
-            <p className="mb-2 text-sm text-muted">
-              Оценены, но нет в CSV: <span className="font-mono">{preview.missingKeys.join(', ')}</span>
+            <p className="text-[13px] text-muted">
+              Оценены, но в CSV нет: <span className="font-mono">{preview.missingKeys.join(', ')}</span>
             </p>
           )}
           {preview.unmatchedKeys.length > 0 && (
-            <p className="mb-2 text-sm text-muted">
-              В CSV, но не оценивались (пропустим): <span className="font-mono">{preview.unmatchedKeys.slice(0, 20).join(', ')}</span>
+            <p className="text-[13px] text-muted">
+              В CSV, но не оценивались: <span className="font-mono">{preview.unmatchedKeys.slice(0, 20).join(', ')}</span>
               {preview.unmatchedKeys.length > 20 && ' …'}
             </p>
           )}
           <div className="max-h-72 overflow-auto rounded-md border border-border">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-surface-raised text-left text-xs uppercase tracking-wide text-muted">
+            <table className="w-full text-[14px]">
+              <thead className="sticky top-0 bg-surface-raised text-left text-[13px] text-muted">
                 <tr>
-                  <th className="px-3 py-2">Ключ</th>
-                  <th className="px-3 py-2">SP</th>
-                  <th className="px-3 py-2">Часы</th>
-                  <th className="px-3 py-2">Спринты</th>
-                  <th className="px-3 py-2">Статус</th>
+                  <th className="px-3 py-2 font-medium">Ключ</th>
+                  <th className="px-3 py-2 font-medium">SP</th>
+                  <th className="px-3 py-2 font-medium">Часы</th>
+                  <th className="px-3 py-2 font-medium">Спринтов</th>
+                  <th className="px-3 py-2 font-medium">Статус</th>
                 </tr>
               </thead>
               <tbody>
@@ -111,24 +103,13 @@ export function ImportPage() {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex justify-end">
-            <Button onClick={apply} disabled={busy || preview.matched.length === 0}>
+          <div className="flex justify-end">
+            <Button size="lg" onClick={apply} disabled={busy || preview.matched.length === 0}>
               Применить к {preview.matched.length} задачам
             </Button>
           </div>
         </Card>
       )}
-    </div>
-  )
-}
-
-function Stat({ label, value, testId }: { label: string; value: string; testId?: string }) {
-  return (
-    <div>
-      <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
-      <dd className="text-lg font-semibold tabular-nums" data-testid={testId}>
-        {value}
-      </dd>
-    </div>
+    </>
   )
 }

@@ -7,7 +7,7 @@ import { Button, Card, ErrorText, Field, Input } from '@/ui'
 export function JoinPage() {
   const { code: codeParam = '' } = useParams()
   const navigate = useNavigate()
-  const [code, setCode] = useState(codeParam)
+  const [code, setCode] = useState(codeParam.toUpperCase())
   const [name, setName] = useState(() => localStorage.getItem('calibrator.name') ?? '')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -26,26 +26,31 @@ export function JoinPage() {
       const sessionId = await joinSession(code, name.trim())
       navigate(`/s/${sessionId}`)
     } catch (err) {
-      setError((err as Error).message)
+      const msg = (err as Error).message
+      setError(msg.includes('no such session') ? 'Планирование с таким кодом не найдено. Проверьте код у фасилитатора.' : msg)
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <div className="mx-auto mt-16 max-w-sm">
-      <Card>
-        <h1 className="mb-1 text-xl font-semibold">Войти в сессию</h1>
-        <p className="mb-5 text-sm text-muted">Аккаунт не нужен: код от фасилитатора и твоё имя.</p>
+    <div className="mx-auto flex min-h-full max-w-md flex-col justify-center px-4 py-8">
+      <Card className="flex flex-col gap-4">
+        <div>
+          <h1 className="text-xl font-semibold">Войти в планирование</h1>
+          <p className="mt-1 text-[15px] text-muted">Без аккаунта: код от фасилитатора и имя, под которым вас знает команда.</p>
+        </div>
         <form onSubmit={submit} className="flex flex-col gap-3">
-          <Field label="Код">
-            <Input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className="font-mono uppercase" required />
-          </Field>
+          {!codeParam && (
+            <Field label="Код">
+              <Input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className="font-mono uppercase tracking-wider" required />
+            </Field>
+          )}
           <Field label="Имя">
-            <Input value={name} onChange={(e) => setName(e.target.value)} required />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Как в команде" required autoFocus />
           </Field>
           <ErrorText error={error} />
-          <Button type="submit" disabled={busy}>
+          <Button type="submit" size="lg" disabled={busy}>
             Войти
           </Button>
         </form>

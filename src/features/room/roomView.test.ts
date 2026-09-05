@@ -16,6 +16,7 @@ const room = {
     { issue_id: 'i1', participant_id: 'p1', round: 2, card: '5' },
     { issue_id: 'i1', participant_id: 'p2', round: 1, card: '3' },
   ],
+  votedIds: ['p1'],
 } as unknown as Room
 
 describe('roomView', () => {
@@ -23,6 +24,14 @@ describe('roomView', () => {
     expect(seats(room)).toEqual([
       { participantId: 'p1', name: 'Ann', voted: true, card: '5' },
       { participantId: 'p2', name: 'Bob', voted: false, card: null },
+    ])
+  })
+
+  it('marks a seat as voted from the ids-only signal even when the card is hidden', () => {
+    const hidden = { ...room, votes: [], votedIds: ['p2'] } as unknown as Room
+    expect(seats(hidden)).toEqual([
+      { participantId: 'p1', name: 'Ann', voted: false, card: null },
+      { participantId: 'p2', name: 'Bob', voted: true, card: null },
     ])
   })
 

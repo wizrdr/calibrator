@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { auth } from '@/data/queries'
 import { Button, Card, ErrorText, Field, Input } from '@/ui'
 
@@ -19,10 +20,13 @@ export function AuthPage() {
   }
 
   return (
-    <div className="mx-auto mt-16 max-w-sm">
+    <div className="mx-auto flex min-h-full max-w-md flex-col justify-center gap-6 px-4 py-8">
+      <div className="flex flex-col gap-2">
+        <span className="text-lg font-semibold">Calibrator</span>
+        <h1 className="text-2xl font-semibold leading-tight text-balance">Planning poker, который помнит, кто как голосовал, и сверяет это с фактом из Jira</h1>
+        <p className="text-[15px] text-muted">Аккаунт нужен только фасилитатору. Команда входит по ссылке без регистрации.</p>
+      </div>
       <Card>
-        <h1 className="mb-1 text-xl font-semibold">Calibrator</h1>
-        <p className="mb-5 text-sm text-muted">Вход для фасилитатора. Участники входят по ссылке из комнаты.</p>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <Field label="Email">
             <Input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
@@ -38,7 +42,7 @@ export function AuthPage() {
             />
           </Field>
           <ErrorText error={error} />
-          <Button type="submit" disabled={busy}>
+          <Button type="submit" size="lg" disabled={busy}>
             {mode === 'in' ? 'Войти' : 'Создать аккаунт'}
           </Button>
           <Button type="button" variant="ghost" onClick={() => setMode(mode === 'in' ? 'up' : 'in')}>
@@ -46,6 +50,12 @@ export function AuthPage() {
           </Button>
         </form>
       </Card>
+      <p className="text-center text-[13px] text-muted">
+        Вас позвали на планирование?{' '}
+        <Link to="/join" className="text-accent">
+          Войти по коду
+        </Link>
+      </p>
     </div>
   )
 }

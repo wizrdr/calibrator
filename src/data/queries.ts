@@ -65,16 +65,23 @@ export async function joinSession(code: string, name: string): Promise<string> {
   return unwrap(await supabase.rpc('join_session', { code, name }))
 }
 
-export type Room = { session: Session; issues: Issue[]; participants: Participant[]; votes: Vote[] }
+export type Room = { session: Session; issues: Issue[]; participants: Participant[]; votes: Vote[]; votedIds: string[] }
 
 export async function loadRoom(sessionId: string): Promise<Room> {
-  const [session, issues, participants, votes] = await Promise.all([
+  const [session, issues, participants, votes, voted] = await Promise.all([
     supabase.from('sessions').select().eq('id', sessionId).single(),
     supabase.from('issues').select().eq('session_id', sessionId).order('order_idx'),
     supabase.from('participants').select().eq('session_id', sessionId).order('joined_at'),
     supabase.from('votes').select().eq('session_id', sessionId),
+    supabase.rpc('voted_participants', { s: sessionId }),
   ])
-  return { session: unwrap(session), issues: unwrap(issues), participants: unwrap(participants), votes: unwrap(votes) }
+  return {
+    session: unwrap(session),
+    issues: unwrap(issues),
+    participants: unwrap(participants),
+    votes: unwrap(votes),
+    votedIds: (unwrap(voted) as string[]) ?? [],
+  }
 }
 
 export async function startVoting(sessionId: string, issueId: string, round = 1): Promise<void> {
@@ -155,4 +162,12 @@ export async function setExcludeReason(issueId: string, reason: string | null): 
 
 export async function importHistory(teamId: string, payload: unknown): Promise<number> {
   return unwrap(await supabase.rpc('import_history', { p_team: teamId, payload: payload as never }))
+}
+
+export async function updateTeam(id: string, name: string): Promise<void> {
+  unwrap(await supabase.from('teams').update({ name }).eq('id', id).select())
+}
+
+export async function mergeMembers(teamId: string, from: string, into: string): Promise<void> {
+  unwrap(await supabase.rpc('merge_members', { p_team: teamId, p_from: from, p_into: into }))
 }

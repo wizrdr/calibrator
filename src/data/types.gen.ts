@@ -186,6 +186,7 @@ export type Database = {
           sprint_name: string
           state: string
           team_id: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
@@ -196,6 +197,7 @@ export type Database = {
           sprint_name: string
           state?: string
           team_id: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
@@ -206,6 +208,7 @@ export type Database = {
           sprint_name?: string
           state?: string
           team_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -315,6 +318,11 @@ export type Database = {
       is_revealed: { Args: { s: string }; Returns: boolean }
       is_session_owner: { Args: { s: string }; Returns: boolean }
       join_session: { Args: { code: string; name: string }; Returns: string }
+      merge_members: {
+        Args: { p_from: string; p_into: string; p_team: string }
+        Returns: undefined
+      }
+      voted_participants: { Args: { s: string }; Returns: string[] }
     }
     Enums: {
       [_ in never]: never

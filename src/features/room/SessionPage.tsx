@@ -1,5 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { isFacilitator, useAuth } from '@/features/auth/useAuth'
+import { Shell } from '@/app/Shell'
+import { TeamProvider } from '@/features/team/useTeam'
 import { Card, ErrorText } from '@/ui'
 import { FacilitatorView } from './FacilitatorView'
 import { ParticipantView } from './ParticipantView'
@@ -10,19 +12,32 @@ export function SessionPage() {
   const { user } = useAuth()
   const { room, error, reload } = useRoom(sessionId)
 
-  if (error) return <ErrorText error={error} />
-  if (!room || !user) return <p className="text-sm text-muted">Загрузка…</p>
+  if (error) return <div className="p-6"><ErrorText error={error} /></div>
+  if (!room || !user) return <p className="p-6 text-sm text-muted">Загрузка…</p>
 
-  if (isFacilitator(user)) return <FacilitatorView room={room} reload={reload} />
+  if (isFacilitator(user)) {
+    return (
+      <TeamProvider>
+        <Shell>
+          <FacilitatorView room={room} reload={reload} />
+        </Shell>
+      </TeamProvider>
+    )
+  }
 
   const me = room.participants.find((p) => p.user_id === user.id)
   if (!me) {
     return (
-      <Card>
-        <p className="text-sm text-muted">
-          Ты не в этой сессии. <Link to="/join" className="text-accent">Войти по коду</Link>
-        </p>
-      </Card>
+      <div className="mx-auto max-w-md p-6">
+        <Card>
+          <p className="text-[15px] text-muted">
+            Вы не в этом планировании.{' '}
+            <Link to="/join" className="text-accent">
+              Войти по коду
+            </Link>
+          </p>
+        </Card>
+      </div>
     )
   }
   return <ParticipantView room={room} me={me} reload={reload} />
