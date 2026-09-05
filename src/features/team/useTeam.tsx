@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createTeam, listSessions, listTeamIssues, listTeams, type Issue, type Session, type Team } from '@/data/queries'
+import { useT } from '@/i18n'
 
 type TeamState = {
   team: Team | null
@@ -20,6 +21,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const inflight = useRef<Promise<void> | null>(null)
+  const { t } = useT()
 
   const refresh = useCallback(() => {
     if (inflight.current) return inflight.current
@@ -28,7 +30,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
         let teams = await listTeams()
         if (teams.length === 0) {
           // The unique index on owner_id turns a race into a duplicate error; re-list instead of failing.
-          await createTeam('Моя команда').catch(() => undefined)
+          await createTeam(t('common.defaultTeam')).catch(() => undefined)
           teams = await listTeams()
         }
         const t = teams[0]
@@ -45,7 +47,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
       }
     })()
     return inflight.current
-  }, [])
+  }, [t])
 
   useEffect(() => {
     refresh()

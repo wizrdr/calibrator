@@ -62,7 +62,8 @@
 - [x] `src/i18n`: словари ru/en, `LangProvider`, `useT`, `LangSwitch`, автоопределение + localStorage
 - [x] Все экраны на ключах; `labelBias` → `verdictOf` (данные), слова в UI
 - [x] Тест паритета словарей; e2e с локалью ru-RU и проверкой переключения на EN с сохранением после reload
-- [ ] Деплой и e2e на живом URL
+- [x] Деплой и e2e на живом URL: 3 passed
+- [ ] Плюрализация в EN («1 issues») и RU («2 задач») — отложено
 
 ## Review
 

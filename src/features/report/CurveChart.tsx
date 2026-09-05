@@ -19,7 +19,7 @@ export function CurveChart({ curve, k }: { curve: CurvePoint[]; k: number }) {
         <g key={v}>
           <line x1={pad.l} x2={W - pad.r} y1={y(v)} y2={y(v)} stroke="var(--grid-line)" />
           <text x={pad.l - 6} y={y(v) + 4} textAnchor="end" fontSize="11" fill="var(--text-muted)">
-            {Math.round(v)}
+            {maxY < 10 ? v.toFixed(1) : Math.round(v)}
           </text>
         </g>
       ))}

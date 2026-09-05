@@ -10,6 +10,7 @@ export const en: Dict = {
     signOut: 'Sign out',
     language: 'Language',
     team: 'Team',
+    defaultTeam: 'My team',
     round: 'round {n}',
   },
   state: {

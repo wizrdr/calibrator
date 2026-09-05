@@ -8,6 +8,7 @@ export const ru = {
     signOut: 'Выйти',
     language: 'Язык',
     team: 'Команда',
+    defaultTeam: 'Моя команда',
     round: 'раунд {n}',
   },
   state: {
