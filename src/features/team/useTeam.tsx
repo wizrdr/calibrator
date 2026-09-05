@@ -33,9 +33,9 @@ export function TeamProvider({ children }: { children: ReactNode }) {
           await createTeam(t('common.defaultTeam')).catch(() => undefined)
           teams = await listTeams()
         }
-        const t = teams[0]
-        const [s, i] = await Promise.all([listSessions(t.id), listTeamIssues(t.id)])
-        setTeam(t)
+        const first = teams[0]
+        const [s, i] = await Promise.all([listSessions(first.id), listTeamIssues(first.id)])
+        setTeam(first)
         setSessions(s)
         setIssues(i)
         setError(null)
