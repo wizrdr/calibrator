@@ -4,22 +4,8 @@ import { importHistory } from '@/data/queries'
 import { toHistoryPayload } from '@/domain/historyPayload'
 import { toJiraCsv } from '@/domain/jiraCsv'
 import { generateSynthetic, type SynthParams } from '@/domain/synthetic'
+import { DEMO_PARAMS } from '@/domain/demoParams'
 import { Button, Card, ErrorText, Field, Input } from '@/ui'
-
-export const DEMO_PARAMS: SynthParams = {
-  sprints: 6,
-  issuesPerSprint: 12,
-  k: 4,
-  sigmaIssue: 0.3,
-  people: [
-    { name: 'Ann', bias: 0.5, sigma: 0.25 },
-    { name: 'Bob', bias: 1, sigma: 0.25 },
-    { name: 'Cid', bias: 1.5, sigma: 0.25 },
-  ],
-  missingFactRate: 0.15,
-  carryOverRate: 0.1,
-  seed: 1,
-}
 
 // Demo data: fake sprints with known biases, so the report can be checked before real Jira data exists.
 export function GeneratorPage() {

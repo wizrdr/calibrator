@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { generateSynthetic } from '../src/domain/synthetic'
 import { toJiraCsv } from '../src/domain/jiraCsv'
-import { DEMO_PARAMS } from '../src/features/generator/GeneratorPage'
+import { DEMO_PARAMS } from '../src/domain/demoParams'
 
 async function signUpLead(page: Page) {
   await page.goto('/')
@@ -36,4 +36,5 @@ test('report recovers the injected biases end to end', async ({ page }) => {
   await expect(label('Ann')).toHaveText(/^занижает в 1\.[4-9]×$/)
   await expect(label('Bob')).toHaveText(/^калиброван/)
   await expect(label('Cid')).toHaveText(/^завышает в 1\.[3-8]×$/)
+  await page.screenshot({ path: 'test-results/report.png', fullPage: true })
 })
