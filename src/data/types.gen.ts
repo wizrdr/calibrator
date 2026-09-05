@@ -306,6 +306,10 @@ export type Database = {
         Args: { i: string; p: string; r: number; s: string }
         Returns: boolean
       }
+      import_history: {
+        Args: { p_team: string; payload: Json }
+        Returns: number
+      }
       is_owner: { Args: { t: string }; Returns: boolean }
       is_participant: { Args: { s: string }; Returns: boolean }
       is_revealed: { Args: { s: string }; Returns: boolean }

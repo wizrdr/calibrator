@@ -85,6 +85,9 @@ export function TeamPage() {
           <Link to={`/team/${teamId}/report`} className="text-accent hover:underline">
             Отчёт
           </Link>
+          <Link to={`/team/${teamId}/generator`} className="text-muted hover:text-text">
+            Синтетика
+          </Link>
           <Link to="/" className="text-muted hover:text-text">
             ← команды
           </Link>

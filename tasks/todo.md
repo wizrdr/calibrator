@@ -34,7 +34,16 @@
 - [x] `MappingCard`: имена участников из всех сессий → member ростера (bulk по display_name)
 - [x] Playwright `e2e/import.spec.ts`: CSV с одной лишней и одной недостающей задачей → coverage 33%, применение → /report. 1 passed
 ## Сессия 5 — отчёт
+- [x] `domain/report.ts` (buildReport: coverage, scale, curve, bias vs fact / vs final, carry-over, top misses, drift, без факта) + 4 теста
+- [x] `ReportPage`, `CurveChart` (одна серия, IQR-усы, серые n<3), `BiasTable` (точка + полоса на log-оси ×0.25…×4), переключатель раунда, «исключить» задачу без факта
+- [ ] Визуально не смотрел ни разу — открыть /team/:id/report на синтетике и глянуть глазами
 ## Сессия 6 — e2e + деплой
+- [x] Миграция `20260905000100_import_history.sql`: RPC `import_history(team, payload)` для владельца, применена, типы перегенерированы
+- [x] `GeneratorPage` (/team/:id/generator, ссылка «Синтетика» на странице команды): generateSynthetic → import_history → CSV факта
+- [ ] **СТОП 05.09 ~11:00.** `e2e/synthetic.spec.ts` не запускается: импортирует `GeneratorPage` ради `DEMO_PARAMS`, а тот тянет `data/supabase.ts` с `import.meta.env` → в Node падает «Cannot read properties of undefined (reading 'VITE_SUPABASE_URL')». Фикс: вынести `DEMO_PARAMS` в `src/domain/demoParams.ts` и импортировать оттуда и в тесте, и в странице.
+- [ ] Прогнать `npx playwright test` (3 спека) локально, потом против живого URL: `BASE_URL=https://wizrdr.github.io/calibrator npx playwright test` (в конфиге baseURL пока захардкожен на 5174 — добавить чтение process.env.BASE_URL)
+- [ ] Проверка с телефона как участник на живом URL
+- [ ] Отчёт глазами на синтетике (см. сессию 5)
 
 ## Review
 

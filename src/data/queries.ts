@@ -152,3 +152,7 @@ export async function assignMember(participantIds: string[], memberId: string | 
 export async function setExcludeReason(issueId: string, reason: string | null): Promise<void> {
   unwrap(await supabase.from('issues').update({ exclude_reason: reason }).eq('id', issueId).select())
 }
+
+export async function importHistory(teamId: string, payload: unknown): Promise<number> {
+  return unwrap(await supabase.rpc('import_history', { p_team: teamId, payload: payload as never }))
+}
