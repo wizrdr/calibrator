@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "oxlint",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "rls": "node scripts/rls-check.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.115.0",
